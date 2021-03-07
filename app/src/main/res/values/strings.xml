@@ -9,5 +9,13 @@
       or implied. See the License for the specific language governing permissions and limitations under
       the License.
       -->
-    <string name="app_name">AndroidDevChallenge</string>
+    <string name="app_name">Hourglass</string>
+
+    <string name="ready">READY</string>
+    <string name="min">min</string>
+    <string name="hour">hour</string>
+    <string name="time_separator">:</string>
+    <string name="second">sec</string>
+    <string name="time_format">%02d</string>
+    <string name="time_counter_format">%02d:%02d:%02d.%02d</string>
 </resources>
