@@ -1,6 +1,7 @@
 package com.example.androiddevchallenge.ui.view
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -9,9 +10,15 @@ import androidx.compose.material.icons.twotone.PlayCircle
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -101,6 +108,7 @@ fun TimerCounter(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun TimerSetting(viewModel: TimerViewModel, modifier: Modifier = Modifier) {
     var rest = viewModel.time
@@ -113,6 +121,10 @@ private fun TimerSetting(viewModel: TimerViewModel, modifier: Modifier = Modifie
     var minState by remember(viewModel.time) { mutableStateOf(min) }
     var secState by remember(viewModel.time) { mutableStateOf(sec) }
     CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.body2) {
+        val keyboardController = LocalSoftwareKeyboardController.current
+        val minFocusRequester = remember { FocusRequester() }
+        val secFocusRequester = remember { FocusRequester() }
+
         Row(modifier = modifier.padding(horizontal = 4.dp)) {
             OutlinedTextField(
                 value = stringResource(R.string.time_format, hourState),
@@ -124,7 +136,13 @@ private fun TimerSetting(viewModel: TimerViewModel, modifier: Modifier = Modifie
                         viewModel.setTimer(it, minState, secState)
                     }
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Number
+                ),
+                keyboardActions = KeyboardActions {
+                    minFocusRequester.requestFocus()
+                },
                 singleLine = true,
                 maxLines = 1
             )
@@ -138,14 +156,22 @@ private fun TimerSetting(viewModel: TimerViewModel, modifier: Modifier = Modifie
             OutlinedTextField(
                 value = stringResource(R.string.time_format, minState),
                 label = { Text(text = stringResource(R.string.min)) },
-                modifier = Modifier.weight(1F),
+                modifier = Modifier
+                    .weight(1F)
+                    .focusRequester(minFocusRequester),
                 onValueChange = { str ->
                     str.toIntOrNull()?.takeIf { it in (0..60) }?.let {
                         minState = it
                         viewModel.setTimer(hourState, it, secState)
                     }
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Next,
+                    keyboardType = KeyboardType.Number
+                ),
+                keyboardActions = KeyboardActions {
+                    secFocusRequester.requestFocus()
+                },
                 maxLines = 1
             )
             Text(
@@ -158,14 +184,22 @@ private fun TimerSetting(viewModel: TimerViewModel, modifier: Modifier = Modifie
             OutlinedTextField(
                 value = stringResource(R.string.time_format, secState),
                 label = { Text(text = stringResource(R.string.second)) },
-                modifier = Modifier.weight(1F),
+                modifier = Modifier
+                    .weight(1F)
+                    .focusRequester(secFocusRequester),
                 onValueChange = { str ->
                     str.toIntOrNull()?.takeIf { it in (0..60) }?.let {
                         secState = it
                         viewModel.setTimer(hourState, minState, it)
                     }
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Number
+                ),
+                keyboardActions = KeyboardActions(onDone = {
+                    keyboardController?.hideSoftwareKeyboard()
+                }),
                 maxLines = 1
             )
         }
