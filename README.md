@@ -16,6 +16,8 @@ This app has following functions.
   - can be understood visually
 - hourglass animations
   - tried to use animation apis for hourglass
+- layouts for portrait and landscape
+  - for visibility, define layouts for each directions
 
 ## :camera_flash: Screenshots
 <!-- You can add more screenshots here if you like -->
